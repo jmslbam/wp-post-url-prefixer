@@ -1,0 +1,63 @@
+{
+	"name": "jmslbam/wp-post-url-prefixer",
+	"description": "Prefix only your post URL and not your tag and category permalinks & have a automatic blog posts archive",
+	"license": "GPL-2.0-or-later",
+	"type": "plugin",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+	"config": {
+        "platform-check": false,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"require": {
+        "php": ">=5.6",
+		"brainmaestro/composer-git-hooks": "^2.8",
+		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+        "phpcompatibility/phpcompatibility-wp": "*",
+		"wp-coding-standards/wpcs": "^2.3"
+	},
+	"scripts": {
+		"post-install-cmd": [
+			"cghooks add --no-lock --git-dir='.git'",
+			"Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin::run"
+		],
+		"post-update-cmd": [
+			"cghooks update --git-dir='.git'"
+		],
+		"cghooks": "vendor/bin/cghooks",
+		"test": [
+			"@composer-validate",
+			"@cs"
+		],
+		"composer-validate": [
+			"composer validate --no-check-lock --no-check-all"
+		],
+		"cs": [
+			"vendor/bin/phpcs"
+		],
+		"cs-d": [
+			"files=$(git diff --name-only --diff-filter=d origin/main); vendor/bin/phpcs $files;"
+		],
+		"fix": [
+			"phpcbf"
+		],
+		"fix-d": [
+			"files=$(git diff --name-only --diff-filter=d origin/main); phpcbf $files"
+		]
+	},
+	"extra": {
+		  "hooks": {
+					"config": {
+						"stop-on-failure": ["pre-push"]
+				},
+				"pre-push": [
+						"composer run test"
+				],
+				"post-merge": [
+					"composer install"
+				]
+		  }
+	}
+}
