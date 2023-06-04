@@ -3,7 +3,7 @@ Prefix only your post URL and not your tag and category permalinks & have a auto
 
 
 ## Change singular post prefix
-Defaults to https://jaimemartinez.nl/blog/my-post-slug/
+Defaults to `/blog/` like https://jaimemartinez.nl/blog/using-twig-in-wordpress-with-clarkson/
 
 ```
 add_filter('wp_pup_singular_prefix', function(){
