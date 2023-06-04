@@ -5,14 +5,14 @@
  * @package     WP_PUP
  *
  * @wordpress-plugin
- * Plugin Name:     WordPress Post URL prefixer
+ * Plugin Name:     Post URL prefixer
  * Plugin URI:      https://jaimemartinez.nl/plugins/wp-post-url-prefixer/
- * Description:     Prefix only your post URL and not your tag and category permalinks & have a blog posts archive
- * Author:          jmslbam
+ * Description:     Prefix only your post URL and not your tag and category permalinks & have a automatic blog posts archive
+ * Author:          Jaime Martinez
  * Author URI:      https://jaimemartinez.nl
  * Text Domain:     wp_pup
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         0.2.0
  */
 
 /**
@@ -32,7 +32,7 @@ function wp_pup_get_archive_url_prefix() {
 /**
  * Set prefix value as slug of post and it's archive.
  *
- * To be honest, it also works without this adjustment, but I just want to overwrite the archive slug, so here we are.
+ * @props https://stackoverflow.com/a/24635076/557225
  */
 function wp_pup_register_post_type_args( $args ) {
 	$prefix = \wp_pup_get_singular_url_prefix();
@@ -45,7 +45,9 @@ function wp_pup_register_post_type_args( $args ) {
 		'slug' => $prefix,
 	);
 
-	if ( (int) \get_option( 'page_for_posts' ) === 0 ) {
+	$page_for_posts = (int) \get_option( 'page_for_posts' );
+
+	if ( $page_for_posts === 0 ) {
 		$args['has_archive'] = \wp_pup_get_archive_url_prefix();
 	}
 
@@ -70,6 +72,23 @@ function wp_pup_pre_post_link( $permalink, $post ) {
 	return $permalink;
 }
 add_filter( 'pre_post_link', 'wp_pup_pre_post_link', 15, 2 );
+
+/**
+ * Add rewrite rule
+ *
+ * @props https://stackoverflow.com/a/63312315/557225
+ */
+function wp_pup_posts_add_rewrite_rules( $wp_rewrite ) {
+	$archive           = wp_pup_get_archive_url_prefix();
+	$singular          = \wp_pup_get_singular_url_prefix();
+	$new_rules         = array(
+		$archive . '/page/([0-9]{1,})/?$' => 'index.php?post_type=post&paged=' . $wp_rewrite->preg_index( 1 ),
+		$singular . '/(.+?)/?$'           => 'index.php?post_type=post&name=' . $wp_rewrite->preg_index( 1 ),
+	);
+	$wp_rewrite->rules = $new_rules + $wp_rewrite->rules;
+	return $wp_rewrite->rules;
+}
+add_action( 'generate_rewrite_rules', 'wp_pup_posts_add_rewrite_rules' );
 
 /**
  * Change post type archive link when calling `get_post_type_archive_link`.
