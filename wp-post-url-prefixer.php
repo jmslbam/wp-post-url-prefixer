@@ -34,7 +34,12 @@ function wp_pup_get_archive_url_prefix() {
  *
  * @props https://stackoverflow.com/a/24635076/557225
  */
-function wp_pup_register_post_type_args( $args ) {
+function wp_pup_register_post_type_args( $args, $post_type ) {
+
+	if ( $post_type !== 'post' ) {
+		return $args;
+	}
+
 	$prefix = \wp_pup_get_singular_url_prefix();
 
 	if ( empty( $prefix ) ) {
